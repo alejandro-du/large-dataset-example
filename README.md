@@ -2,6 +2,8 @@
 
 This example shows how to execute a long-running task in a separate thread in Vaadin applications.
 
+![Screenshot](/screenshot.png?raw=true "Screenshot")
+
 ```
 git clone https://github.com/alejandro-du/large-dataset-example.git
 
@@ -11,5 +13,3 @@ mvn clean install
 
 mvn jetty:run
 ```
-
-![Screenshot](/screenshot.png?raw=true "Screenshot")

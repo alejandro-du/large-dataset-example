@@ -11,3 +11,5 @@ mvn clean install
 
 mvn jetty:run
 ```
+
+![Screenshot](/screenshot.png?raw=true "Screenshot")

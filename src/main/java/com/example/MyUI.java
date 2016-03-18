@@ -11,6 +11,7 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 
 import javax.servlet.annotation.WebServlet;
+import java.util.List;
 
 @Theme("valo")
 @Push
@@ -54,25 +55,31 @@ public class MyUI extends UI {
     }
 
     private void loadSyncClicked(Button.ClickEvent event) {
-        loadData();
+        // do all the remove, load data, update UI in the same thread:
+        container.removeAllItems();
+        List<Entity> entities = backendService.findAllEntities();
+        container.addAll(entities);
     }
 
     private void loadAsyncClicked(Button.ClickEvent event) {
-        new Thread(this::loadData).start(); // start the long process in a separate thread
-        progressBar.setVisible(true); // give the user some visual hint about it
-    }
-
-    private void loadData() {
         container.removeAllItems();
-        container.addAll(backendService.findAllEntities());
+        progressBar.setVisible(true); // give the user some visual hint about loading taking place
 
-        // modify the UI from a separate thread, possibly
-        UI.getCurrent().access(this::dataLoaded);
+        // perform the data load in a separate thread
+        loadDataInNewThread();
     }
 
-    private void dataLoaded() {
-        Notification.show("Data loaded.");
-        progressBar.setVisible(false);
+    private void loadDataInNewThread() {
+        new Thread(() -> {
+            List<Entity> entities = backendService.findAllEntities();
+
+            // this is needed because we are modifying the UI from a different thread:
+            UI.getCurrent().access(() -> {
+                progressBar.setVisible(false);
+                container.addAll(entities);
+                progressBar.setVisible(false);
+            });
+        }).start();
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
